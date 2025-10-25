@@ -1,0 +1,289 @@
+<!--
+Simple Static Site - single HTML file
+Features:
+- Responsive layout (mobile-first)
+- Hero section
+- Image carousel (autoplay, arrows, dots, keyboard support)
+- Contact form with client-side validation and mailto fallback
+- Accessible markup and basic SEO meta
+- Instructions: save as `index.html` and deploy to GitHub Pages / Netlify / Vercel
+-->
+
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>示例静态网站 • 个人/公司名片</title>
+  <meta name="description" content="简洁响应式单页示例，含轮播与联系表单，可直接部署为静态站点。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#9aa4b2; --accent:#06b6d4; --glass:rgba(255,255,255,0.04);
+      --maxw:1100px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;}
+    body{
+      margin:0; font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background:linear-gradient(180deg,#071024 0%, #071827 100%); color:#e6eef6; -webkit-font-smoothing:antialiased;
+      line-height:1.45;
+    }
+    .wrap{max-width:var(--maxw); margin:0 auto; padding:24px;}
+    header{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:700}
+    nav a{color:var(--muted);text-decoration:none;margin-left:16px}
+    nav a:hover{color:#fff}
+
+    /* Hero */
+    .hero{display:grid;grid-template-columns:1fr;gap:20px;align-items:center;padding:28px 0}
+    .hero-grid{display:flex;flex-direction:column;gap:16px}
+    .headline{font-size:clamp(20px,4.4vw,36px);font-weight:700;margin:0}
+    .sub{color:var(--muted);max-width:60ch}
+    .cta{display:inline-block;margin-top:8px;padding:10px 16px;border-radius:10px;background:linear-gradient(90deg,var(--accent),#7c3aed);color:#051023;font-weight:600;text-decoration:none}
+
+    /* Carousel */
+    .carousel{position:relative;border-radius:12px;overflow:hidden;background:var(--glass);box-shadow:0 6px 18px rgba(2,6,23,0.6)}
+    .slides{display:flex;transition:transform 450ms ease;border-radius:12px}
+    .slide{min-width:100%;height:260px;display:flex;align-items:flex-end;padding:16px;color:#fff;background-size:cover;background-position:center}
+    .slide .cap{background:linear-gradient(0deg,rgba(2,6,23,0.6),transparent);padding:10px;border-radius:8px}
+    .controls{position:absolute;left:8px;right:8px;top:50%;transform:translateY(-50%);display:flex;justify-content:space-between;pointer-events:none}
+    .btn{pointer-events:auto;background:rgba(0,0,0,0.45);border:0;color:#fff;padding:8px;border-radius:8px;backdrop-filter:blur(4px)}
+    .dots{display:flex;gap:6px;justify-content:center;padding:10px}
+    .dot{width:9px;height:9px;border-radius:99px;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.06)}
+    .dot.active{background:#fff}
+
+    /* Contact */
+    .contact{margin-top:28px;display:grid;grid-template-columns:1fr;gap:12px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:16px;border-radius:12px}
+    .fields{display:grid;grid-template-columns:1fr;gap:10px}
+    input,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
+    label{font-size:13px;color:var(--muted)}
+    .form-row{display:flex;gap:10px}
+    .form-row .col{flex:1}
+    .submit{background:var(--accent);border:0;padding:10px 14px;border-radius:10px;font-weight:600}
+    .note{color:var(--muted);font-size:13px}
+
+    /* Footer */
+    footer{margin-top:34px;padding:18px 0;color:var(--muted);font-size:14px}
+
+    /* Layout for larger screens */
+    @media(min-width:880px){
+      .hero{grid-template-columns:1fr 440px;align-items:start}
+      .hero-grid{padding-right:20px}
+      .slide{height:360px}
+      .contact{grid-template-columns:1fr 320px}
+    }
+    @media(min-width:1200px){.wrap{padding:36px}}
+
+    /* small helpers */
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent); padding:14px; border-radius:12px}
+    .caps{font-size:12px;color:var(--muted);letter-spacing:1px}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">SG</div>
+        <div>
+          <div style="font-weight:700">示例静态站</div>
+          <div style="font-size:13px;color:var(--muted)">简洁 • 响应 • 可部署</div>
+        </div>
+      </div>
+      <nav aria-label="主导航">
+        <a href="#about">关于</a>
+        <a href="#carousel">作品</a>
+        <a href="#contact">联系</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-grid">
+          <p class="caps">欢迎</p>
+          <h1 class="headline">一页式静态示例 — 快速搭建你的在线名片</h1>
+          <p class="sub">这个单文件模板包含响应式布局、自动播放轮播、无后端的联系表单（可配置到表单服务）以及轻量的 JavaScript 逻辑，适合快速上线与演示。</p>
+          <div>
+            <a class="cta" href="#contact">立即联系</a>
+          </div>
+
+          <div style="margin-top:18px;display:flex;gap:12px;flex-wrap:wrap">
+            <div class="card" style="min-width:160px">
+              <div style="font-weight:700">设计</div>
+              <div class="note">现代、极简，手机端优先</div>
+            </div>
+            <div class="card" style="min-width:160px">
+              <div style="font-weight:700">部署</div>
+              <div class="note">支持 GitHub Pages / Netlify / Vercel</div>
+            </div>
+          </div>
+        </div>
+
+        <aside id="carousel" class="card carousel" aria-label="图片轮播示例">
+          <div class="slides" tabindex="0">
+            <figure class="slide" style="background-image:url('https://images.unsplash.com/photo-1504691342899-9b8b9b1b4c46?q=80&w=1500&auto=format&fit=crop')">
+              <figcaption class="cap">项目一 — 用户界面设计</figcaption>
+            </figure>
+            <figure class="slide" style="background-image:url('https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1500&auto=format&fit=crop')">
+              <figcaption class="cap">项目二 — 品牌与标识</figcaption>
+            </figure>
+            <figure class="slide" style="background-image:url('https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?q=80&w=1500&auto=format&fit=crop')">
+              <figcaption class="cap">项目三 — 摄影与视觉</figcaption>
+            </figure>
+          </div>
+
+          <div class="controls" aria-hidden="true">
+            <button class="btn prev" aria-label="上一张">◀</button>
+            <button class="btn next" aria-label="下一张">▶</button>
+          </div>
+          <div class="dots" role="tablist" aria-label="轮播导航"></div>
+        </aside>
+      </section>
+
+      <section id="about" style="margin-top:22px">
+        <div class="card">
+          <h3 style="margin:0 0 8px 0">关于我们</h3>
+          <p class="note">我们专注于简洁、高效的静态页面与交互演示。若需要后端或电商功能，可作为下一步扩展。</p>
+        </div>
+      </section>
+
+      <section id="contact" style="margin-top:18px">
+        <h3>联系</h3>
+        <div class="contact">
+          <form id="contactForm" class="card" novalidate>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <div style="font-weight:700">发送信息</div>
+              <div class="note">会显示本地验证结果（无后端）</div>
+            </div>
+
+            <div class="fields">
+              <div>
+                <label for="name">姓名</label>
+                <input id="name" name="name" type="text" required placeholder="你的名字" />
+              </div>
+              <div>
+                <label for="email">电邮</label>
+                <input id="email" name="email" type="email" required placeholder="you@example.com" />
+              </div>
+              <div>
+                <label for="message">信息</label>
+                <textarea id="message" name="message" rows="5" required placeholder="写下你的需求或问题..."></textarea>
+              </div>
+
+              <div style="display:flex;gap:10px;align-items:center">
+                <button type="submit" class="submit">发送</button>
+                <div id="formFeedback" class="note" aria-live="polite"></div>
+              </div>
+            </div>
+
+          </form>
+
+          <div class="card" style="padding:14px">
+            <h4 style="margin-top:0">其他联系方式</h4>
+            <p class="note">邮箱: <a href="mailto:hello@example.com" style="color:var(--accent)">hello@example.com</a></p>
+            <p class="note">电话: <a href="tel:+1234567890" style="color:var(--accent)">+1 234 567 890</a></p>
+            <div style="margin-top:8px">
+              <a href="#" class="note">Twitter</a> • <a href="#" class="note">LinkedIn</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <div class="note">© <span id="year"></span> 示例静态站</div>
+        <div class="note">Made with ♥ — 静态且轻量</div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // small utilities
+    function q(sel, el=document){return el.querySelector(sel)}
+    function qa(sel, el=document){return Array.from(el.querySelectorAll(sel))}
+
+    // Carousel
+    (function(){
+      const slidesWrap = q('.slides');
+      const slides = qa('.slide');
+      const prevBtn = q('.prev');
+      const nextBtn = q('.next');
+      const dotsWrap = q('.dots');
+      const total = slides.length;
+      let idx = 0; let timer = null; const interval = 4500;
+
+      function go(i){
+        idx = (i + total) % total;
+        slidesWrap.style.transform = `translateX(${ -idx * 100 }%)`;
+        updateDots();
+      }
+      function next(){ go(idx+1) }
+      function prev(){ go(idx-1) }
+      function makeDots(){
+        for(let i=0;i<total;i++){
+          const d = document.createElement('button'); d.className='dot'; d.setAttribute('aria-label','第'+(i+1)+'张'); d.addEventListener('click',()=>{go(i);resetTimer()});
+          dotsWrap.appendChild(d);
+        }
+      }
+      function updateDots(){
+        qa('.dot').forEach((el,i)=>el.classList.toggle('active', i===idx));
+      }
+      function resetTimer(){ clearInterval(timer); timer = setInterval(next, interval) }
+
+      makeDots(); updateDots(); timer = setInterval(next, interval);
+
+      nextBtn.addEventListener('click', ()=>{ next(); resetTimer() });
+      prevBtn.addEventListener('click', ()=>{ prev(); resetTimer() });
+
+      // keyboard support
+      slidesWrap.addEventListener('keydown', (e)=>{
+        if(e.key==='ArrowLeft') { prev(); resetTimer() }
+        if(e.key==='ArrowRight'){ next(); resetTimer() }
+      });
+
+      // pause on focus/hover
+      slidesWrap.addEventListener('mouseenter', ()=>clearInterval(timer));
+      slidesWrap.addEventListener('mouseleave', resetTimer);
+    })();
+
+    // Contact form (client-side validation + mailto fallback)
+    (function(){
+      const form = q('#contactForm');
+      const feedback = q('#formFeedback');
+      form.addEventListener('submit', (e)=>{
+        e.preventDefault();
+        const data = new FormData(form);
+        const name = data.get('name').trim();
+        const email = data.get('email').trim();
+        const message = data.get('message').trim();
+
+        if(!name || !email || !message){
+          feedback.textContent = '请完整填写所有字段。'; feedback.style.color = '#fca5a5'; return;
+        }
+        if(!/^\S+@\S+\.\S+$/.test(email)){ feedback.textContent='请输入有效电邮地址。'; feedback.style.color='#fca5a5'; return }
+
+        // If you have a form backend (Formspree / Netlify Forms / etc.) replace the code below
+        // For demo, open mail client with prefilled content
+        const subject = encodeURIComponent('网站联系：' + name);
+        const body = encodeURIComponent('姓名: '+name+'\n电邮: '+email+'\n\n'+message);
+        const mailto = `mailto:hello@example.com?subject=${subject}&body=${body}`;
+
+        // try to open mail client
+        window.location.href = mailto;
+        feedback.textContent = '已尝试打开邮件客户端；若未打开，请手动发送至 hello@example.com'; feedback.style.color='#bde6ea';
+        form.reset();
+      });
+    })();
+
+    // set year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+  </script>
+</body>
+</html>
